@@ -5,18 +5,13 @@ const fs = require('fs');
 
 class MyReadable extends Readable {
     constructor (){
-        console.log('readable constructor');
-        super();    
+        super(); 
     }
     _read(size) {
-        console.log('readable _read');        
-      let chunk= 'Lorem Ipsum...';
-    //   const bff = new Buffer(size);
-    setInterval(() => {
         this.push(new Date().toString());
-    }, 1000)    
-    //   this.push(new Date());
-    //   this.push(null);
+        const updateDateInterval = setInterval(() => {
+            this.push(new Date().toString());
+        }, 1000);    
     }
 }
 class MyWritable extends Writable {
@@ -24,34 +19,39 @@ class MyWritable extends Writable {
         super();
         this.fd = fs.openSync(filePath, 'w',  (err, file) => {
             if (err) throw err;
-            console.log('Saved!');
-          });    
+        });    
     }
     _write(chunk, encoding, callback) {
-        console.log(this);
-        fs.writeFile(this.fd, chunk,  (err)=> {
+        fs.appendFile(this.fd, chunk,  (err) => {
             if (err) throw err;
-            console.log(chunk);
             console.log('Saved!');
-            // done();
             callback();
         });
     }
   }
 
+class MyTransform extends Transform {
+    constructor() {
+      super();
+    }
+    _transform(chunk, encoding, callback) {
+       this.push(moment(chunk.toString()).format());
+        callback();
+    }
+    _flush(callback) {
+        callback();
+    }
+  }  
+  
 const readStream = new MyReadable();
+const transformStream = new MyTransform();
 const writeStream = new MyWritable('./time.txt');
 
-readStream.pipe(writeStream);
+readStream.pipe(transformStream).pipe(writeStream);
 
 
-
-// // const createReadStream = fs.createReadStream(()=>{});
-// // const createWriteStream = fs.createWriteStream('./time.txt');
-// let test=moment().format();
-// setInterval(() => {
-//     console.log(test+ "\n");
-//     // createWriteStream.write(moment().format(), (err, b) => {
-//     //     if (err) throw err;
-//     // });
-// }, 1000)        
+// readStream.on('data', (data) =>{
+//     console.log(data.toString());
+//     writeStream.write(data.toString())
+// }
+// );
