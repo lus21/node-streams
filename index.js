@@ -12,28 +12,29 @@ class MyReadable extends Readable {
         console.log('readable _read');        
       let chunk= 'Lorem Ipsum...';
     //   const bff = new Buffer(size);
-      // setInterval(() => {
-//     moment().format()
-// }, 1000)    
-    //   this.push(chunk);
+    setInterval(() => {
+        this.push(new Date().toString());
+    }, 1000)    
+    //   this.push(new Date());
     //   this.push(null);
-      console.log('readable null');      
-       while (null !== (chunk = getNextChunk())) {
-         this.push(chunk);
-       }
     }
 }
 class MyWritable extends Writable {
     constructor (filePath){
         super();
-        this.fd = fs.open(filePath, 'w');    
+        this.fd = fs.openSync(filePath, 'w',  (err, file) => {
+            if (err) throw err;
+            console.log('Saved!');
+          });    
     }
     _write(chunk, encoding, callback) {
-        fs.writeFile(this.fd, chunk, function (err) {
+        console.log(this);
+        fs.writeFile(this.fd, chunk,  (err)=> {
             if (err) throw err;
             console.log(chunk);
             console.log('Saved!');
-            done();
+            // done();
+            callback();
         });
     }
   }
