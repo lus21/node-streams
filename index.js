@@ -8,8 +8,7 @@ class MyReadable extends Readable {
         super(); 
     }
     _read(size) {
-        this.push(new Date().toString());
-        const updateDateInterval = setInterval(() => {
+        setTimeout(() => {
             this.push(new Date().toString());
         }, 1000);    
     }
